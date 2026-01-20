@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Página de Teste — Clique (GA4)</title>
+
+  <!-- Substitua pelo seu GA4 Measurement ID (ex: G-XXXXXXXXXX) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DVTCRBC54J"></script>
+  <script>
+    // --- CONFIGURE AQUI ---
+    const GA_MEASUREMENT_ID = 'G-DVTCRBC54J'; // <- troque para o seu ID
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    // Detecta plataforma: primeiro lê ?platform=..., senão heurísticas de UA / objetos
+    function detectPlatform() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const forced = urlParams.get('platform');
+        if (forced) return forced; // permite que a app passe ?platform=webview
+      } catch (e) { /* ignore */ }
+
+      const ua = navigator.userAgent || '';
+
+      // React Native WebView (padrão para RN WebView)
+      if (typeof window.ReactNativeWebView !== 'undefined') return 'react-native-webview';
+
+      // Android WebView heurística: 'wv' token ou 'Version/' dentro do UA
+      if (/; wv\)/i.test(ua) || /\bwv\b/i.test(ua) || /Android.*Version\//i.test(ua)) return 'android-webview';
+
+      // iOS webview heurística: iPhone/iPad/iPod mas sem 'Safari' no UA (não é perfeito)
+      if (/(iPhone|iPad|iPod)/i.test(ua) && !/Safari/i.test(ua)) return 'ios-webview';
+
+      // Fallback mobile vs desktop
+      if (/(Mobile|Android|iPhone)/i.test(ua)) return 'mobile-browser';
+      return 'desktop';
+    }
+
+    const platform = detectPlatform();
+
+    // Define user property e configura o GA (envia page_view automaticamente)
+    gtag('config', GA_MEASUREMENT_ID, {
+      'send_page_view': true,
+      'user_properties': { 'platform': platform }
+    });
+
+    // Função chamada no clique do botão
+    let clickCount = 0;
+    function handleTestClick() {
+      clickCount += 1;
+      document.getElementById('count').textContent = clickCount;
+
+      // Evento GA4 com parâmetro 'platform' (também pode usar user_property)
+      gtag('event', 'test_button_click', {
+        'event_category': 'engagement',
+        'event_label': 'Botão de teste - clique único',
+        'platform': platform
+      });
+
+      // Feedback visual temporário
+      const btn = document.getElementById('test-btn');
+      btn.classList.add('clicked');
+      setTimeout(() => btn.classList.remove('clicked'), 250);
+    }
+  </script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 2rem; color:#222 }
+    .card { max-width:600px; margin:0 auto; background:#fff; border:1px solid #eee; padding:1.25rem; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.03) }
+    h1{margin-top:0}
+    button { background:#0b6cff; color:#fff; border:0; padding:0.8rem 1.1rem; font-size:1rem; border-radius:6px; cursor:pointer }
+    button.clicked { transform: translateY(1px); opacity:0.95 }
+    pre { background:#f7f7f8; padding:0.6rem; border-radius:6px; overflow:auto }
+    .meta { margin-top:0.75rem; color:#555; font-size:0.95rem }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Página de Teste — Clique</h1>
+    <p class="meta">Plataforma detectada: <strong id="detected-platform"></strong></p>
+
+    <p>
+      Esta página envia um evento GA4 nomeado <code>test_button_click</code> toda vez que o botão abaixo é clicado.
+      O evento inclui o parâmetro <code>platform</code> (e também definimos <code>platform</code> como user_property).
+    </p>
+
+    <p>
+      <button id="test-btn" onclick="handleTestClick()">Clique aqui</button>
+      <span style="margin-left:12px">Contador: <strong id="count">0</strong></span>
+    </p>
+
+    <hr/>
+
+    <p class="meta">
+      Observações de teste:
+      <ul>
+        <li>Para forçar o modo WebView (por ex. quando a app abre a URL), use <code>?platform=webview</code> ou <code>?platform=android-webview</code>.</li>
+        <li>Substitua <code>G-XXXXXXX</code> pelo seu Measurement ID.</li>
+        <li>Use o DebugView do GA4 para validar eventos em tempo real.</li>
+      </ul>
+    </p>
+  </div>
+
+  <script>
+    document.getElementById('detected-platform').textContent = platform;
+  </script>
+</body>
+</html>
