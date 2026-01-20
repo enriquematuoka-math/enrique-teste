@@ -59,7 +59,9 @@
         'event_label': 'Botão de teste - clique único',
         'platform': platform
       });
-
+      if (window.AndroidBridge) {
+        AndroidBridge.logClick("clique_botao_webview");
+      }
       // Feedback visual temporário
       const btn = document.getElementById('test-btn');
       btn.classList.add('clicked');
